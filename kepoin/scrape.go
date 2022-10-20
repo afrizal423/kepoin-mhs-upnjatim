@@ -26,8 +26,10 @@ func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string, kelasnya stri
 	// Instantiate default collector
 	c := colly.NewCollector(
 		colly.AllowedDomains("siamik.upnjatim.ac.id"),
+		colly.Async(true),
 	)
 
+	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 5})
 	// On every a element which has href attribute call callback
 	c.OnHTML("h7 > table > tbody", func(e *colly.HTMLElement) {
 		e.ForEach("tr", func(_ int, row *colly.HTMLElement) {
@@ -46,7 +48,7 @@ func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string, kelasnya stri
 					// final := MhsDitemukan{}
 					// final.AddItem(dt)
 					// fmt.Println(final)
-					fmt.Println("=======================Matkul=======================")
+					fmt.Println("=======================Matkul========================")
 					fmt.Println("Kode Matkul :", kodematkul)
 					fmt.Println("Mata Kuliah :", matkul)
 					fmt.Println("Jumlah SKS:", sksnya)
@@ -66,13 +68,17 @@ func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string, kelasnya stri
 	})
 
 	c.Visit(nextUrl)
+	c.Wait()
 }
 
 func (sc *ScrapeMahasiswa) scrapeListMatkul(nextUrl string) {
 	// Instantiate default collector
 	c := colly.NewCollector(
 		colly.AllowedDomains("siamik.upnjatim.ac.id"),
+		colly.Async(true),
 	)
+
+	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 5})
 
 	// On every a element which has href attribute call callback
 	c.OnHTML("table tbody", func(e *colly.HTMLElement) {
@@ -116,14 +122,17 @@ func (sc *ScrapeMahasiswa) scrapeListMatkul(nextUrl string) {
 	})
 
 	c.Visit(nextUrl)
+	c.Wait()
 }
 
 func (sc *ScrapeMahasiswa) scrapeListProdi(kodprod string) {
 	// Instantiate default collector
 	c := colly.NewCollector(
 		colly.AllowedDomains("siamik.upnjatim.ac.id"),
+		colly.Async(true),
 	)
 
+	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 5})
 	// On every a element which has href attribute call callback
 	c.OnHTML("table tbody", func(e *colly.HTMLElement) {
 		e.ForEach("tr", func(_ int, row *colly.HTMLElement) {
@@ -152,4 +161,6 @@ func (sc *ScrapeMahasiswa) scrapeListProdi(kodprod string) {
 	})
 
 	c.Visit("https://siamik.upnjatim.ac.id/html/siamik/daftarPesertaKuliah.asp")
+
+	c.Wait()
 }
