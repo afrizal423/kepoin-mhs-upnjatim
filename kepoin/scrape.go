@@ -8,7 +8,8 @@ import (
 )
 
 type ScrapeMahasiswa struct {
-	Npm string
+	Npm   string
+	Kelas string
 }
 
 func (sc *ScrapeMahasiswa) ScrapeSiamik(kodeprodi string) {
@@ -18,7 +19,6 @@ func (sc *ScrapeMahasiswa) ScrapeSiamik(kodeprodi string) {
 func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string) {
 	// Instantiate default collector
 	c := colly.NewCollector(
-		// Visit only domains: hackerspaces.org, wiki.hackerspaces.org
 		colly.AllowedDomains("siamik.upnjatim.ac.id"),
 	)
 
@@ -31,18 +31,15 @@ func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string) {
 	})
 
 	// On every a element which has href attribute call callback
-	c.OnHTML("table tbody", func(e *colly.HTMLElement) {
+	c.OnHTML("h7 > table > tbody", func(e *colly.HTMLElement) {
 		e.ForEach("tr", func(_ int, row *colly.HTMLElement) {
-			if row.Index != 0 && row.Index != 1 {
 
-				row.ForEach("td", func(_ int, td *colly.HTMLElement) {
+			row.ForEach("td", func(_ int, td *colly.HTMLElement) {
 
-					if td.Index == 1 && td.Text == sc.Npm {
-						fmt.Println(td.Text, td.Index, sc.Npm, "KKKKKKKKKKKKKKKKKKKKKKKKEEEEEEEEEEEEEEEETEEEEEEEEEEEEEEMUUUUUUUUUUUUUU")
-					}
-					// fmt.Println(td.Text, td.Index, sc.Npm)
-				})
-			}
+				if td.Index == 1 && td.Text == sc.Npm {
+					fmt.Println(td.Text, td.Index, sc.Npm, "KKKKKKKKKKKKKKKKKKKKKKKKEEEEEEEEEEEEEEEETEEEEEEEEEEEEEEMUUUUUUUUUUUUUU")
+				}
+			})
 
 		})
 	})
@@ -53,14 +50,12 @@ func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string) {
 		// fmt.Println("Visiting ListPesertaMatkul", r.URL.String())
 	})
 
-	// Start scraping on https://hackerspaces.org
 	c.Visit(nextUrl)
 }
 
 func (sc *ScrapeMahasiswa) scrapeListMatkul(nextUrl string) {
 	// Instantiate default collector
 	c := colly.NewCollector(
-		// Visit only domains: hackerspaces.org, wiki.hackerspaces.org
 		colly.AllowedDomains("siamik.upnjatim.ac.id"),
 	)
 
@@ -83,7 +78,8 @@ func (sc *ScrapeMahasiswa) scrapeListMatkul(nextUrl string) {
 					}
 
 					if td.Index == 4 {
-						fmt.Println("Kelas : ", td.Text)
+						split := strings.Split(td.Text, sc.Npm[2:5])
+						fmt.Println("Kelas : ", split[0])
 					}
 
 				})
@@ -98,14 +94,12 @@ func (sc *ScrapeMahasiswa) scrapeListMatkul(nextUrl string) {
 		fmt.Println("Visiting Matkul", r.URL.String())
 	})
 
-	// Start scraping on https://hackerspaces.org
 	c.Visit(nextUrl)
 }
 
 func (sc *ScrapeMahasiswa) scrapeListProdi(kodprod string) {
 	// Instantiate default collector
 	c := colly.NewCollector(
-		// Visit only domains: hackerspaces.org, wiki.hackerspaces.org
 		colly.AllowedDomains("siamik.upnjatim.ac.id"),
 	)
 
@@ -136,6 +130,5 @@ func (sc *ScrapeMahasiswa) scrapeListProdi(kodprod string) {
 		fmt.Println("Visiting", r.URL.String())
 	})
 
-	// Start scraping on https://hackerspaces.org
 	c.Visit("https://siamik.upnjatim.ac.id/html/siamik/daftarPesertaKuliah.asp")
 }
