@@ -42,3 +42,17 @@ type FoundOnPDDikti struct {
 		LinkProdi    string      `json:"link_prodi"`
 	} `json:"dataumum"`
 }
+
+type Matkul struct {
+	KodeMatkul string
+	MataKuliah string
+	JumlahSks  int
+	Kelas      string
+}
+
+type MhsDitemukan struct {
+	Npm    string
+	Nama   string
+	Prodi  string
+	Matkul []Matkul
+}

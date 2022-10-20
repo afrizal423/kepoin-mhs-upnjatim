@@ -1,5 +1,7 @@
 package kepoin
 
+import "fmt"
+
 type CariMahasiswa struct {
 	Npm   string
 	Nama  string
@@ -12,6 +14,11 @@ func (findMhs *CariMahasiswa) FindMhsByNPM(npm string) {
 	foundDikti := f.FindMhsByNPM(npm)
 	findMhs.Nama = foundDikti.Dataumum.NmPd
 	findMhs.Prodi = foundDikti.Dataumum.Namaprodi
+	fmt.Println("======================Biodata========================")
+	fmt.Println("Nama Mahasiswa :", findMhs.Nama)
+	fmt.Println("NPM :", npm)
+	fmt.Println("Prodi:", findMhs.Prodi)
+	fmt.Println("=====================================================")
 	sc := ScrapeMahasiswa{
 		Npm: npm,
 	}

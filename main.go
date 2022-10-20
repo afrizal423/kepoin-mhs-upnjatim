@@ -8,8 +8,6 @@ import (
 
 func main() {
 	f := kepoin.CariMahasiswa{}
-	f.FindMhsByNPM("19081010026")
+	f.FindMhsByNPM("22011010106")
 	fmt.Println()
-	fmt.Println(f.Nama, f.Npm, f.Prodi)
-	fmt.Println("heko")
 }
