@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/debug"
 )
 
 type ScrapeMahasiswa struct {
@@ -13,12 +15,9 @@ type ScrapeMahasiswa struct {
 	Kelas string
 }
 
-func (f *MhsDitemukan) AddItem(item Matkul) {
-	f.Matkul = append(f.Matkul, item)
-}
-
 func (sc *ScrapeMahasiswa) ScrapeSiamik(kodeprodi string) {
 	sc.scrapeListProdi(kodeprodi)
+	// sc.scrapeListMKDU() // WIP
 }
 
 func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string, kelasnya string, kodematkul string,
@@ -39,22 +38,12 @@ func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string, kelasnya stri
 				if td.Index == 1 && td.Text == sc.Npm {
 					sksnya, _ := strconv.Atoi(sks)
 					split2 := strings.Split(kelasnya, sc.Npm[2:5])
-					// dt := Matkul{
-					// 	KodeMatkul: kodematkul,
-					// 	MataKuliah: matkul,
-					// 	JumlahSks:  sksnya,
-					// 	Kelas:      split2[0],
-					// }
-					// final := MhsDitemukan{}
-					// final.AddItem(dt)
-					// fmt.Println(final)
 					fmt.Println("=======================Matkul========================")
 					fmt.Println("Kode Matkul :", kodematkul)
 					fmt.Println("Mata Kuliah :", matkul)
 					fmt.Println("Jumlah SKS:", sksnya)
 					fmt.Println("Kelas : ", split2[0])
 					fmt.Println("=====================================================")
-					// fmt.Println(td.Text, td.Index, sc.Npm, "KKKKKKKKKKKKKKKKKKKKKKKKEEEEEEEEEEEEEEEETEEEEEEEEEEEEEEMUUUUUUUUUUUUUU")
 				}
 			})
 
@@ -85,30 +74,18 @@ func (sc *ScrapeMahasiswa) scrapeListMatkul(nextUrl string) {
 		e.ForEach("tr", func(_ int, row *colly.HTMLElement) {
 
 			if row.Index != 0 {
-				// fmt.Println("Kelas : ", )
 				kelasnya := row.ChildText("td:nth-child(5)")
 				kodematkul := row.ChildText("td:nth-child(2)")
 				matkul := row.ChildText("td:nth-child(3)")
 				sks := row.ChildText("td:nth-child(4)")
 				row.ForEach("td", func(_ int, td *colly.HTMLElement) {
-					// fmt.Println(td.Text, td.Index)
 
 					if td.Index == 1 {
 						row.ForEach("a[href]", func(_ int, d *colly.HTMLElement) {
 							link := d.Attr("href")
-							// Print link
-							// fmt.Printf("Link found: %q -> %s\n", d.Text, link)
-							// fmt.Println(e.Request.AbsoluteURL(link))
-
 							sc.scrapeListPesertaMatkul(e.Request.AbsoluteURL(link), kelasnya, kodematkul, matkul, sks)
 						})
 					}
-
-					// if td.Index == 4 {
-					// 	split := strings.Split(td.Text, sc.Npm[2:5])
-					// 	fmt.Println("Kelas : ", split[0])
-					// }
-
 				})
 			}
 
@@ -143,10 +120,6 @@ func (sc *ScrapeMahasiswa) scrapeListProdi(kodprod string) {
 						// fmt.Println(td.Text, td.Index)
 						row.ForEach("a[href]", func(_ int, d *colly.HTMLElement) {
 							link := d.Attr("href")
-							// Print link
-							// fmt.Printf("Link found: %q -> %s\n", d.Text, link)
-							// fmt.Println(e.Request.AbsoluteURL(link))
-
 							sc.scrapeListMatkul(e.Request.AbsoluteURL(link))
 						})
 					}
@@ -162,5 +135,53 @@ func (sc *ScrapeMahasiswa) scrapeListProdi(kodprod string) {
 
 	c.Visit("https://siamik.upnjatim.ac.id/html/siamik/daftarPesertaKuliah.asp")
 
+	c.Wait()
+}
+
+// MKDU
+// WIP
+func (sc *ScrapeMahasiswa) scrapeListMKDU() {
+	// Instantiate default collector
+	c := colly.NewCollector(
+		colly.AllowedDomains("siamik.upnjatim.ac.id"),
+		colly.Debugger(&debug.LogDebugger{}),
+		colly.Async(true),
+	)
+
+	// Limit the number of threads started by colly to 5
+	// when visiting links which domains' matches "*httpbin.*" glob
+	c.Limit(&colly.LimitRule{
+		DomainGlob:  "*siamik.upnjatim.*",
+		Parallelism: 2,
+		RandomDelay: 300 * time.Second,
+	})
+
+	// On every a element which has href attribute call callback
+	c.OnHTML("h7 > table > tbody", func(e *colly.HTMLElement) {
+		e.ForEach("tr", func(_ int, row *colly.HTMLElement) {
+
+			if row.Index != 0 {
+				row.ForEach("td", func(_ int, td *colly.HTMLElement) {
+					// fmt.Println(td.Text, td.Index)
+					row.ForEach("a[href]", func(_ int, d *colly.HTMLElement) {
+						link := d.Attr("href")
+						// Print link
+						fmt.Printf("Link found: %q -> %s\n", d.Text, link)
+						// fmt.Println(e.Request.AbsoluteURL(link))
+
+						// sc.scrapeListMatkul(e.Request.AbsoluteURL(link))
+					})
+				})
+			}
+		})
+	})
+
+	// Before making a request print "Visiting ..."
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL.String())
+	})
+
+	c.Visit("https://siamik.upnjatim.ac.id/html/siamik/daftarPesertaKuliahMKDU.asp")
+	// Wait until threads are finished
 	c.Wait()
 }

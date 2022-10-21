@@ -73,6 +73,5 @@ func (findMhs *PdDikti) FindMhsByNPM(npm string) FoundOnPDDikti {
 		fmt.Println("Can not unmarshal JSON")
 	}
 
-	// fmt.Println(mhsDitemukan.Dataumum.NmPd)
 	return mhsDitemukan
 }
