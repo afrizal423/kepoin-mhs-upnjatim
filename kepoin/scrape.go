@@ -16,8 +16,8 @@ type ScrapeMahasiswa struct {
 }
 
 func (sc *ScrapeMahasiswa) ScrapeSiamik(kodeprodi string) {
-	sc.scrapeListProdi(kodeprodi)
-	// sc.scrapeListMKDU() // WIP
+	// sc.scrapeListProdi(kodeprodi)
+	sc.scrapeListMKDU() // WIP
 }
 
 func (sc *ScrapeMahasiswa) scrapeListPesertaMatkul(nextUrl string, kelasnya string, kodematkul string,
@@ -153,7 +153,7 @@ func (sc *ScrapeMahasiswa) scrapeListMKDU() {
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*siamik.upnjatim.*",
 		Parallelism: 2,
-		RandomDelay: 300 * time.Second,
+		RandomDelay: 50 * time.Second,
 	})
 
 	// On every a element which has href attribute call callback
