@@ -143,7 +143,7 @@ func (sc *ScrapeMahasiswa) scrapeListProdi(kodprod string) {
 func (sc *ScrapeMahasiswa) scrapeListMKDU() {
 	// Instantiate default collector
 	c := colly.NewCollector(
-		colly.AllowedDomains("siamik.upnjatim.ac.id"),
+		colly.AllowedDomains("mkdu.test"),
 		colly.Debugger(&debug.LogDebugger{}),
 		colly.Async(true),
 	)
@@ -151,7 +151,7 @@ func (sc *ScrapeMahasiswa) scrapeListMKDU() {
 	// Limit the number of threads started by colly to 5
 	// when visiting links which domains' matches "*httpbin.*" glob
 	c.Limit(&colly.LimitRule{
-		DomainGlob:  "*siamik.upnjatim.*",
+		DomainGlob:  "*mkdu.*",
 		Parallelism: 2,
 		RandomDelay: 50 * time.Second,
 	})
@@ -173,6 +173,7 @@ func (sc *ScrapeMahasiswa) scrapeListMKDU() {
 					})
 				})
 			}
+
 		})
 	})
 
@@ -181,7 +182,7 @@ func (sc *ScrapeMahasiswa) scrapeListMKDU() {
 		fmt.Println("Visiting", r.URL.String())
 	})
 
-	c.Visit("https://siamik.upnjatim.ac.id/html/siamik/daftarPesertaKuliahMKDU.asp")
+	c.Visit("http://mkdu.test")
 	// Wait until threads are finished
 	c.Wait()
 }
